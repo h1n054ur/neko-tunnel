@@ -1,0 +1,13 @@
+# Create a tunnel: cloudflared tunnel create neko-tunnel
+# Route DNS:      cloudflared tunnel route dns neko-tunnel your-subdomain.example.com
+# Then copy your credentials JSON to config/cloudflared/credentials.json
+
+tunnel: YOUR-TUNNEL-UUID
+credentials-file: /etc/cloudflared/credentials.json
+
+ingress:
+  - hostname: your-subdomain.example.com
+    service: http://neko:8080
+    originRequest:
+      httpHostHeader: your-subdomain.example.com
+  - service: http_status:404

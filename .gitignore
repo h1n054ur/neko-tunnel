@@ -1,0 +1,7 @@
+# Secrets
+.env
+config/cloudflared/credentials.json
+config/cloudflared/config.yml
+
+# Runtime data
+data/

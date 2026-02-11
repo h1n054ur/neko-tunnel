@@ -1,0 +1,32 @@
+services:
+  neko:
+    image: "ghcr.io/m1k1o/neko/google-chrome:latest"
+    restart: unless-stopped
+    shm_size: "2gb"
+    cap_add:
+      - SYS_ADMIN
+    entrypoint: ["/bin/sh", "-c", "chown -R neko:neko /home/neko/.config/google-chrome && exec /usr/bin/supervisord -c /etc/neko/supervisord.conf"]
+    volumes:
+      - ./data/chromium:/home/neko/.config/google-chrome
+      - ./index.html:/var/www/index.html:ro
+      - ./mic-inject.js:/var/www/mic-inject.js:ro
+    environment:
+      NEKO_DESKTOP_SCREEN: "${NEKO_SCREEN}"
+      NEKO_MEMBER_MULTIUSER_USER_PASSWORD: "${NEKO_USER_PASSWORD}"
+      NEKO_MEMBER_MULTIUSER_ADMIN_PASSWORD: "${NEKO_ADMIN_PASSWORD}"
+      # ICE servers are injected by the start.sh script
+      NEKO_WEBRTC_ICESERVERS_FRONTEND: "${NEKO_ICE_SERVERS}"
+      NEKO_WEBRTC_ICESERVERS_BACKEND: "${NEKO_ICE_SERVERS}"
+      NEKO_WEBRTC_ICELITE: 0
+      # Allow users to take control by clicking inside the video
+      NEKO_SESSION_IMPLICIT_HOSTING: "true"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel run
+    volumes:
+      - ./config/cloudflared:/etc/cloudflared
+    depends_on:
+      - neko
+    profiles:
+      - tunnel
